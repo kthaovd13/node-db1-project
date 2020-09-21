@@ -6,7 +6,18 @@ const db = require('../data/dbConfig');
 const router = express.Router();
 
 //CREATE
-router.post()
+router.post('/', async (req, res) => {
+
+    const budgetData = req.body
+
+    try {
+        const budget = await db.insert(budgetData).into('budget');
+        res.status(201).json(budget)
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "server error", error: err });
+    }
+});
 
 //READ
 router.get('/', async (req, res) => {
@@ -20,6 +31,9 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
+
+    const { id } = req.params;
+
     try {
         const budget = await db.select('*').from('budget').where({ id }).first();
         if (budget) {
@@ -29,14 +43,41 @@ router.get('/', async (req, res) => {
         }
     } catch (err) {
         console.log(err);
-        res.status(500).json({ message: "server error"})
+        res.status(500).json({ message: "server error"});
     }
-})
+});
 
 //UPDATE
-router.put()
+router.put('/:id', async (req, res) => {
+    
+    const { id } = req.params;
+    const changes = req.body;
+
+    try {
+        const budget = await db.select('*').from('budget').where({ id }.update(changes));
+        if (count) {
+            res.status(200).json({ updated: count });
+        } else {
+            res.status(404).json({ message: "invalid ID" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "server error" });
+    }
+});
 
 //DELETE
-router.delete()
+router.delete('/', async (req, res) => {
+
+    const { id } = req.params;
+
+    try {
+        const count = await db.del().from('budget').where({ id });
+        count ? res.status(200).json({ deleted: count })
+            : res.status(404).json({ message: "Invalid ID" });
+    } catch (err) {
+        res.status(500).json({ message: "server error", error: err });
+    }
+});
 
 module.exports = router;
